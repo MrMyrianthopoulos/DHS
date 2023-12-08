@@ -1,0 +1,98 @@
+---
+title: "DATA 607 Final Project"
+author: "Siebecker/Myrianthopoulos"
+date: "2023-12-07"
+output: html_document
+---
+
+```{r}
+
+#Loads required libraries
+library(tidyverse)
+
+#Imports the data from fivethirtyeight.com's github repository
+all_polls_data <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/raw-polls.csv")
+
+```
+
+#Data Cleaning
+
+```{r}
+
+#Selects relevant columns
+cleaned_polls_data <- all_polls_data %>%
+  select(year, type_detail, pollster, pollster_rating_id, methodology, partisan, polldate, error, bias, rightcall, cand1_party, cand2_party, margin_poll) %>%
+  filter(cand1_party == "DEM" & cand2_party == "REP")
+
+partisan_d <- cleaned_polls_data %>%
+  filter(partisan == "D")
+
+partisan_r <- cleaned_polls_data %>%
+  filter(partisan == "R")
+
+partisan_non <- cleaned_polls_data %>%
+  filter(partisan == "")
+
+partisan_either <- cleaned_polls_data %>%
+  filter(partisan == "D" | partisan == "R")
+
+
+```
+
+#Spread of Partisan Polls Over Time
+
+```{r}
+
+partisan_growth <- cleaned_polls_data %>%
+  group_by(year) %>%
+  mutate(d_partisan = sum(case_when((partisan == "D") ~ 1, T ~ 0))) %>%
+  mutate(r_partisan = sum(case_when((partisan == "R") ~ 1, T ~ 0))) %>%
+  ungroup() %>%
+  select(year, d_partisan, r_partisan) %>%
+  distinct() %>%
+  filter(year %% 2 == 0) %>%
+  rename(Dem = d_partisan, Rep = r_partisan) %>%
+  pivot_longer(!year, names_to = "party", values_to = "tally")
+
+ggplot(partisan_growth, mapping = aes(x = year, y = tally, group = party, color = party)) + 
+  geom_line() +
+  labs(title = "Partisan Polls by Year", x = "Year", y = "Polls", fill = "Party") +
+  scale_color_manual(values = c("Dem" = "blue", "Rep" = "red"))
+```
+
+#Bias
+
+```{r}
+
+partisan_d_freq <- partisan_d %>%
+  group_by(year, type_detail) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  select(year, type_detail, count) %>%
+  distinct() %>%
+  arrange(desc(count))
+
+partisan_r_freq <- partisan_r %>%
+  group_by(year, type_detail) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  select(year, type_detail, count) %>%
+  distinct() %>%
+  arrange(desc(count))
+
+```
+
+#TestingRightCall
+
+```{r}
+
+rightcalltest <- all_polls_data %>%
+  filter(cand1_party == "DEM" & cand2_party == "REP") %>%
+  mutate(our_rightcall = case_when((margin_poll > 0 & margin_actual > 0) ~ 1.0,
+         (margin_poll < 0 & margin_actual < 0) ~ 1.0,
+         (margin_poll == 0) ~ 0.5,
+         T ~ 0)) %>%
+  filter(rightcall != our_rightcall)
+         
+
+```
