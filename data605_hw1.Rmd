@@ -85,7 +85,7 @@ for(i in 1:40) { #For loop for returning to the original figure.
   plot(y2~x2, xlim=c(-7,7), ylim=c(-7,7), main = "THE SAME CHA CHA SLIDE JOKE AGAIN!")
 }
 
-for(i in 1:40) {
+for(i in 1:40) { #This for loop just makes the original (and final) image stay on the screen for a few extra seconds. It's important to provide closure!
   plot(y~x, xlim=c(-7,7), ylim=c(-7,7), main = "THANKS FOR WATCHING! BYE!")
 }
 ```
