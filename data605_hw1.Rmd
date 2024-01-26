@@ -19,6 +19,10 @@ x11() #Opens a new viewing window.
 
 plot(y~x, xlim=c(-7,7), ylim=c(-7,7)) #Plots the initial figure.
 
+for(i in 1:40) { #Title screen
+  plot(y~x, xlim=c(-7,7), ylim=c(-7,7), xlab = "x", ylab = "y", main = "WELCOME!")
+}
+
 for(i in 0:40) { #For loop for demonstrating shear. i = 0 to start since the directions specify that the matrix should be the identity matrix to begin.
   m2 <- matrix(c(1,0,0.0125*i,1), nrow = 2, ncol = 2)
   z2 <- m2 %*% z
